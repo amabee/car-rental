@@ -33,10 +33,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ITEMS_PER_PAGE = 5;
 
 export const BookingComponent = () => {
+  const url = "http://localhost/car-rental_api/admin/process.php";
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
@@ -44,21 +52,139 @@ export const BookingComponent = () => {
   const [carList, setCarList] = useState([]);
   const [userList, setUserList] = useState([]);
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
+  const [selectedCar, setSelectedCar] = useState(null);
   const [newBooking, setNewBooking] = useState({
     carID: "",
-    input2: "",
-    input3: "",
-    input4: "",
-    input5: "",
+    customer_id: "",
+    rental_start: "",
+    rental_end: "",
+    total_price: "",
+    status: "",
+    booking_source: "walk-in",
   });
 
+  const getCarList = async () => {
+    try {
+      const res = await axios.get(url, {
+        params: {
+          operation: "getAvailableCars",
+          json: "",
+        },
+      });
+
+      if (res.status !== 200) {
+        alert("Status Error: " + res.statusText);
+        return;
+      }
+
+      if (res.data.success) {
+        setCarList(res.data.success);
+        return;
+      } else {
+        alert("Something went wrong");
+        return;
+      }
+    } catch (e) {
+      alert("An unexpected error occurred");
+      console.log(e);
+    }
+  };
+
+  const getUsersList = async () => {
+    try {
+      const res = await axios.get(url, {
+        params: {
+          operation: "getListOfUsers",
+          json: "",
+        },
+      });
+
+      if (res.status !== 200) {
+        alert("Status Error: " + res.statusText);
+        return;
+      }
+
+      if (res.data.success) {
+        setUserList(res.data.success);
+        return;
+      } else {
+        alert("Something went wrong fetching users");
+        return;
+      }
+    } catch (e) {
+      alert("An unexpected error occurred fetching users");
+      console.log(e);
+    }
+  };
+
+  const getBookingList = async () => {
+    try {
+      const res = await axios.get(url, {
+        params: {
+          operation: "readBookings",
+          json: "",
+        },
+      });
+
+      if (res.status !== 200) {
+        alert("Status Error: " + res.statusText);
+        return;
+      }
+
+      if (res.data.success) {
+        setBookings(res.data.success);
+        return;
+      } else {
+        alert("Something went wrong fetching booking list");
+        console.log(res.data);
+        setBookings([]);
+        return;
+      }
+    } catch (e) {
+      alert("An unexpected error occurred fetching booking list");
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
-    const getCarList = async () => {
-      try {
-        const res = await axios.get(url);
-      } catch (e) {}
-    };
-  });
+    getCarList();
+    getUsersList();
+
+    getBookingList();
+  }, []);
+
+  const calculateTotalPrice = () => {
+    if (selectedCar && newBooking.rental_start && newBooking.rental_end) {
+      const start = new Date(newBooking.rental_start);
+      const end = new Date(newBooking.rental_end);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      const totalPrice = days * selectedCar.price_per_day;
+      setNewBooking((prev) => ({
+        ...prev,
+        total_price: totalPrice.toFixed(2),
+      }));
+    }
+  };
+
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [newBooking.rental_start, newBooking.rental_end, selectedCar]);
+
+  const handleCarSelect = (value) => {
+    const car = carList.find((car) => car.car_id === value);
+    setSelectedCar(car);
+    setNewBooking((prevBooking) => ({
+      ...prevBooking,
+      carID: value,
+    }));
+  };
+
+  const handleUserSelect = (value) => {
+    setNewBooking((prevBooking) => ({
+      ...prevBooking,
+      customer_id: value,
+    }));
+  };
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -93,21 +219,77 @@ export const BookingComponent = () => {
     );
   };
 
+  const createBooking = async () => {
+    const formData = new FormData();
+    formData.append("operation", "createBooking");
+    formData.append(
+      "json",
+      JSON.stringify({
+        car_id: newBooking.carID,
+        customer_id: newBooking.customer_id,
+        rental_start: newBooking.rental_start,
+        rental_end: newBooking.rental_end,
+        total_price: newBooking.total_price,
+        status: newBooking.status,
+        booking_source: "walk-in",
+      })
+    );
+
+    try {
+      const res = await axios({
+        url: url,
+        method: "POST",
+        data: formData,
+      });
+
+      if (res.status !== 200) {
+        alert("Status Error");
+        return;
+      }
+
+      if (res.data.success) {
+        alert("Booking Created!");
+        return;
+      } else {
+        alert("Something went wrong while creating the booking");
+        console.log(res.data);
+        return;
+      }
+    } catch (error) {
+      alert("An error occured in the system");
+      return;
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewBooking((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddBooking = () => {
-    console.log("New booking:", newBooking);
+    createBooking();
     setIsAddBookingOpen(false);
     setNewBooking({
-      input1: "",
-      input2: "",
-      input3: "",
-      input4: "",
-      input5: "",
+      carID: "",
+      customer_id: "",
+      rental_start: "",
+      rental_end: "",
+      total_price: "",
+      status: "",
+      booking_source: "walk-in",
     });
+    setSelectedCar(null);
+  };
+
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   return (
@@ -127,16 +309,84 @@ export const BookingComponent = () => {
             </AlertDialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">
-                  Input
-                </Label>
+                <Label className="text-right">Select Car</Label>
+                <Select onValueChange={handleCarSelect}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Car" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {carList.map((car) => (
+                      <SelectItem key={car.car_id} value={car.car_id}>
+                        {car.make} {car.model} (₱{car.price_per_day}/day)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Select Customer</Label>
+                <Select onValueChange={handleUserSelect}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Customer List" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userList.map((user) => (
+                      <SelectItem
+                        key={user.customer_id}
+                        value={user.customer_id}
+                      >
+                        {user.first_name} {user.last_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Rental Start</Label>
                 <Input
-                  // id={}
-                  // name={}
-                  // value={}
-                  // onChange={handleInputChange}
+                  name="rental_start"
+                  value={newBooking.rental_start}
+                  onChange={handleInputChange}
+                  type="datetime-local"
+                  className="col-span-2"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Rental End</Label>
+                <Input
+                  name="rental_end"
+                  value={newBooking.rental_end}
+                  onChange={handleInputChange}
+                  type="datetime-local"
+                  className="col-span-2"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Total Price</Label>
+                <Input
+                  name="total_price"
+                  value={newBooking.total_price}
+                  readOnly
+                  type="number"
                   className="col-span-3"
                 />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">Status</Label>
+                <Select
+                  onValueChange={(value) =>
+                    handleInputChange({ target: { name: "status", value } })
+                  }
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="canceled">Canceled</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <AlertDialogFooter>
@@ -165,7 +415,21 @@ export const BookingComponent = () => {
                   onClick={() => handleSort("date")}
                   className="cursor-pointer"
                 >
-                  Date
+                  Rental- Start Date
+                  <SortIcon column="date" />
+                </TableHead>
+                <TableHead
+                  onClick={() => handleSort("date")}
+                  className="cursor-pointer"
+                >
+                  Rental- End Date
+                  <SortIcon column="date" />
+                </TableHead>
+                <TableHead
+                  onClick={() => handleSort("price")}
+                  className="cursor-pointer"
+                >
+                  Total Price
                   <SortIcon column="date" />
                 </TableHead>
                 <TableHead
@@ -175,15 +439,23 @@ export const BookingComponent = () => {
                   Status
                   <SortIcon column="status" />
                 </TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paginatedBookings.map((booking) => (
-                <TableRow key={booking.id}>
-                  <TableCell className="font-medium">{booking.id}</TableCell>
-                  <TableCell>{booking.name}</TableCell>
-                  <TableCell>{booking.date}</TableCell>
+                <TableRow key={booking.booking_id}>
+                  <TableCell className="font-medium">
+                    {booking.booking_id}
+                  </TableCell>
+                  <TableCell>{`${booking.first_name} ${booking.last_name}`}</TableCell>
+                  <TableCell>{formatDate(booking.rental_start)}</TableCell>
+                  <TableCell>{formatDate(booking.rental_end)}</TableCell>
+                  <TableCell>{booking.total_price}</TableCell>
                   <TableCell>{booking.status}</TableCell>
+                  <TableCell>
+                    <Button>Update</Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
