@@ -261,6 +261,42 @@ export const BookingComponent = () => {
     }
   };
 
+  const updateBookingStatus = async (bookingId, newStatus) => {
+    try {
+      const formData = new FormData();
+      formData.append("operation", "updateBooking");
+      formData.append(
+        "json",
+        JSON.stringify({
+          booking_id: bookingId,
+          status: newStatus,
+        })
+      );
+
+      const res = await axios({
+        url: url,
+        method: "POST",
+        data: formData,
+      });
+
+      if (res.status !== 200) {
+        alert("Status Error");
+        return;
+      }
+
+      if (res.data.success) {
+        alert("Booking status updated successfully!");
+        getBookingList();
+      } else {
+        alert("Something went wrong while updating the booking status");
+        console.log(res.data);
+      }
+    } catch (error) {
+      alert("An error occurred in the system");
+      console.log(error);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewBooking((prev) => ({ ...prev, [name]: value }));
@@ -432,13 +468,7 @@ export const BookingComponent = () => {
                   Total Price
                   <SortIcon column="date" />
                 </TableHead>
-                <TableHead
-                  onClick={() => handleSort("status")}
-                  className="cursor-pointer"
-                >
-                  Status
-                  <SortIcon column="status" />
-                </TableHead>
+
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -452,9 +482,31 @@ export const BookingComponent = () => {
                   <TableCell>{formatDate(booking.rental_start)}</TableCell>
                   <TableCell>{formatDate(booking.rental_end)}</TableCell>
                   <TableCell>{booking.total_price}</TableCell>
-                  <TableCell>{booking.status}</TableCell>
                   <TableCell>
-                    <Button>Update</Button>
+                    <Select
+                      defaultValue={booking.status}
+                      onValueChange={(value) =>
+                        updateBookingStatus(booking.booking_id, value)
+                      }
+                      disabled={
+                        booking.status === "completed" ||
+                        booking.status === "canceled"
+                      }
+                    >
+                      <SelectTrigger
+                        className={`w-[180px] capitalize ${
+                          booking.status === "canceled" ? "bg-red-600" : ""
+                        }`}
+                      >
+                        <SelectValue placeholder={booking.status} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="canceled">Canceled</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                 </TableRow>
               ))}
