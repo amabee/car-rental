@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
-export const UsersComponent = () => (
+export const BookingComponent = () => (
   <Card>
     <CardHeader>
       <CardTitle>Users Management</CardTitle>

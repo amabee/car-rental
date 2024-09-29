@@ -49,7 +49,7 @@ const LoginPage = () => {
 
       if (res.data.success) {
         sessionStorage.setItem("user", JSON.stringify(res.data.success));
-        window.location.href = "/";
+        window.location.href = "/Dashboard";
       } else {
         return alert(res.data.error);
       }

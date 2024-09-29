@@ -9,15 +9,15 @@ import { Sidebar } from "@/components/shared/sidebar";
 import { Dashboard } from "@/components/shared/dashboard";
 import { Cars } from "@/components/shared/cars";
 import { Settings } from "@/components/shared/settings";
-import { UsersComponent } from "@/components/shared/users";
+import { BookingComponent } from "@/components/shared/users";
 import "../../public/styles/styles.css";
 
 const AdminDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
   const { theme, setTheme } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentSession, setCurrentSession] = useState(null); // Use null instead of an empty array
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [currentSession, setCurrentSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,7 +30,7 @@ const AdminDashboard = () => {
       const parsedSession = JSON.parse(getSession);
       setCurrentSession(parsedSession);
       setLoading(false);
-    }, 5000); // Simulate a 2-second delay
+    }, 2000); // Simulate a 2-second delay
 
     return () => clearTimeout(timer); // Cleanup timer on unmount
   }, []);
@@ -39,8 +39,8 @@ const AdminDashboard = () => {
     switch (activeView) {
       case "dashboard":
         return <Dashboard />;
-      case "users":
-        return <UsersComponent />;
+      case "bookings":
+        return <BookingComponent />;
       case "cars":
         return <Cars />;
       case "settings":
@@ -68,11 +68,19 @@ const AdminDashboard = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 ease-in-out`}
       >
-        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <Sidebar
+          activeView={activeView}
+          setActiveView={setActiveView}
+          isSidebarOpen={isSidebarOpen}
+        />
       </div>
 
       <div className="hidden md:block">
-        <Sidebar activeView={activeView} setActiveView={setActiveView} />
+        <Sidebar
+          activeView={activeView}
+          setActiveView={setActiveView}
+          isSidebarOpen={isSidebarOpen}
+        />
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
