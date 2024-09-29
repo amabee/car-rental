@@ -9,7 +9,7 @@ import { Sidebar } from "@/components/shared/sidebar";
 import { Dashboard } from "@/components/shared/dashboard";
 import { Cars } from "@/components/shared/cars";
 import { Settings } from "@/components/shared/settings";
-import { BookingComponent } from "@/components/shared/users";
+import { BookingComponent } from "@/components/shared/bookings";
 import "../../public/styles/styles.css";
 
 const AdminDashboard = () => {
