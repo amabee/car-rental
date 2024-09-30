@@ -109,14 +109,14 @@ const LoginPage = () => {
                 />
               </div>
               <div className="flex items-center justify-end">
-                <div className="text-base">
+                {/* <div className="text-base">
                   <a
                     href="#"
                     className="font-medium text-blue-600 hover:text-blue-500"
                   >
                     Forgot password?
                   </a>
-                </div>
+                </div> */}
               </div>
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-6"
@@ -126,7 +126,7 @@ const LoginPage = () => {
               </Button>
             </form>
 
-            <div className="mt-8 text-center text-base text-gray-600 dark:text-gray-400">
+            {/* <div className="mt-8 text-center text-base text-gray-600 dark:text-gray-400">
               Don't have an account?{" "}
               <a
                 href="#"
@@ -134,7 +134,7 @@ const LoginPage = () => {
               >
                 Sign up
               </a>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>

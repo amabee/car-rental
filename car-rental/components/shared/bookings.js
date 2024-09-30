@@ -49,6 +49,7 @@ export const BookingComponent = () => {
   const [sortColumn, setSortColumn] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [bookings, setBookings] = useState([]);
+  const [sortedBookings, setSortedBookings] = useState([]);
   const [carList, setCarList] = useState([]);
   const [userList, setUserList] = useState([]);
   const [isAddBookingOpen, setIsAddBookingOpen] = useState(false);
@@ -149,9 +150,23 @@ export const BookingComponent = () => {
   useEffect(() => {
     getCarList();
     getUsersList();
-
     getBookingList();
   }, []);
+
+  useEffect(() => {
+    if (sortColumn) {
+      const sorted = [...bookings].sort((a, b) => {
+        if (a[sortColumn] < b[sortColumn])
+          return sortDirection === "asc" ? -1 : 1;
+        if (a[sortColumn] > b[sortColumn])
+          return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+      setSortedBookings(sorted);
+    } else {
+      setSortedBookings(bookings);
+    }
+  }, [bookings, sortColumn, sortDirection]);
 
   const calculateTotalPrice = () => {
     if (selectedCar && newBooking.rental_start && newBooking.rental_end) {
@@ -194,13 +209,6 @@ export const BookingComponent = () => {
       setSortDirection("asc");
     }
   };
-
-  const sortedBookings = [...bookings].sort((a, b) => {
-    if (!sortColumn) return 0;
-    if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1;
-    if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1;
-    return 0;
-  });
 
   const paginatedBookings = sortedBookings.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -249,6 +257,7 @@ export const BookingComponent = () => {
 
       if (res.data.success) {
         alert("Booking Created!");
+        getBookingList();
         return;
       } else {
         alert("Something went wrong while creating the booking");
@@ -441,34 +450,33 @@ export const BookingComponent = () => {
               <TableRow>
                 <TableHead className="w-[100px]">ID</TableHead>
                 <TableHead
-                  onClick={() => handleSort("name")}
+                  onClick={() => handleSort("first_name")}
                   className="cursor-pointer"
                 >
                   Name
-                  <SortIcon column="name" />
+                  <SortIcon column="first_name" />
                 </TableHead>
                 <TableHead
-                  onClick={() => handleSort("date")}
+                  onClick={() => handleSort("rental_start")}
                   className="cursor-pointer"
                 >
-                  Rental- Start Date
-                  <SortIcon column="date" />
+                  Rental Start Date
+                  <SortIcon column="rental_start" />
                 </TableHead>
                 <TableHead
-                  onClick={() => handleSort("date")}
+                  onClick={() => handleSort("rental_end")}
                   className="cursor-pointer"
                 >
-                  Rental- End Date
-                  <SortIcon column="date" />
+                  Rental End Date
+                  <SortIcon column="rental_end" />
                 </TableHead>
                 <TableHead
-                  onClick={() => handleSort("price")}
+                  onClick={() => handleSort("total_price")}
                   className="cursor-pointer"
                 >
                   Total Price
-                  <SortIcon column="date" />
+                  <SortIcon column="total_price" />
                 </TableHead>
-
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
