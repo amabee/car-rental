@@ -21,7 +21,13 @@ Widget buildCar(Car car, int index) {
           alignment: Alignment.centerRight,
           child: Container(
             decoration: BoxDecoration(
-              color: kPrimaryColor,
+              color: car.status == "available"
+                  ? kPrimaryColor
+                  : car.status == "rented"
+                      ? Colors.orange
+                      : car.status == "maintenance"
+                          ? Colors.red
+                          : Colors.grey,
               borderRadius: const BorderRadius.all(
                 Radius.circular(15),
               ),

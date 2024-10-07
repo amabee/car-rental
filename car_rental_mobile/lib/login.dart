@@ -55,14 +55,14 @@ class _CarLoginSignupPageState extends State<CarLoginSignupPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Logo
-                    Icon(
+                    const Icon(
                       Icons.directions_car,
                       size: 80,
                       color: Colors.white,
                     ),
-                    SizedBox(height: 20),
-                    Text(
-                      'Car Enthusiast',
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Anster Car Rental',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -70,14 +70,14 @@ class _CarLoginSignupPageState extends State<CarLoginSignupPage> {
                         letterSpacing: 1.5,
                       ),
                     ),
-                    SizedBox(height: 40),
+                    const SizedBox(height: 40),
                     // Form
                     Container(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.8),
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
                             blurRadius: 10,
@@ -91,21 +91,21 @@ class _CarLoginSignupPageState extends State<CarLoginSignupPage> {
                           children: [
                             Text(
                               _isLogin ? 'Login' : 'Sign Up',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
                             ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             if (!_isLogin) ...[
                               // First Name Field
                               TextFormField(
                                 controller: _firstNameController,
                                 decoration: InputDecoration(
                                   hintText: 'Firstname',
-                                  prefixIcon:
-                                      Icon(Icons.person, color: Colors.black54),
+                                  prefixIcon: const Icon(Icons.person,
+                                      color: Colors.black54),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),

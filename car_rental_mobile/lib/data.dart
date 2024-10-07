@@ -12,7 +12,6 @@ List<NavigationItem> getNavigationItemList() {
   return <NavigationItem>[
     NavigationItem(Icons.home),
     NavigationItem(Icons.calendar_today),
-    NavigationItem(Icons.notifications),
     NavigationItem(Icons.person),
   ];
 }
@@ -24,7 +23,8 @@ class Car {
   final String status;
   final String image;
   final double price;
-  final int year; // Changed to int
+  final int year;
+  final String? isAvailable;
 
   Car({
     required this.id,
@@ -34,6 +34,7 @@ class Car {
     required this.image,
     required this.price,
     required this.year,
+    this.isAvailable,
   });
 
   factory Car.fromJson(Map<String, dynamic> json) {
@@ -45,7 +46,7 @@ class Car {
       image:
           "http://192.168.56.1/car-rental_api/car_images/" + json['car_image'],
       price: double.parse(json['price_per_day']),
-      year: json['year'], // No change needed here
+      year: json['year'],
     );
   }
 }
@@ -54,6 +55,27 @@ Future<List<Car>> fetchAvailableCars() async {
   var url =
       Uri.parse('http://192.168.56.1/car-rental_api/customer/process.php');
   final query = {"operation": "getAvailableCars", "json": jsonEncode({})};
+  final response = await http.get(url.replace(queryParameters: query));
+  try {
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      List<dynamic> cars = jsonResponse['success'];
+      print(cars);
+      return cars.map((carData) => Car.fromJson(carData)).toList();
+    } else {
+      throw Exception('Failed to load cars');
+    }
+  } catch (error) {
+    print(response);
+    print("Error: $error");
+    throw error;
+  }
+}
+
+Future<List<Car>> fetchAllCars() async {
+  var url =
+      Uri.parse('http://192.168.56.1/car-rental_api/customer/process.php');
+  final query = {"operation": "getAllCars", "json": jsonEncode({})};
   final response = await http.get(url.replace(queryParameters: query));
   try {
     if (response.statusCode == 200) {
@@ -90,8 +112,6 @@ class Customer {
     );
   }
 }
-
-
 
 class Dealer {
   String name;

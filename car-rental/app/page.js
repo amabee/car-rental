@@ -15,8 +15,13 @@ const LoginPage = () => {
   const { theme, setTheme } = useTheme();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  //#region DESIGN RELATED
+
+  // Ensure theme is mounted correctly
   useEffect(() => {
+    if (sessionStorage.getItem("user") !== null) {
+      window.location.href = "/Dashboard";
+      return;
+    }
     setMounted(true);
   }, []);
 
@@ -27,7 +32,6 @@ const LoginPage = () => {
   if (!mounted) {
     return null;
   }
-  //#endregion
 
   const handleLogin = async () => {
     try {
@@ -41,8 +45,6 @@ const LoginPage = () => {
         },
       });
 
-      console.log(res);
-
       if (res.status !== 200) {
         return alert("Connection Error");
       }
@@ -53,7 +55,9 @@ const LoginPage = () => {
       } else {
         return alert(res.data.error);
       }
-    } catch (e) {}
+    } catch (e) {
+      return alert("Something went wrong!");
+    }
   };
 
   return (
@@ -108,33 +112,14 @@ const LoginPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              <div className="flex items-center justify-end">
-                {/* <div className="text-base">
-                  <a
-                    href="#"
-                    className="font-medium text-blue-600 hover:text-blue-500"
-                  >
-                    Forgot password?
-                  </a>
-                </div> */}
-              </div>
               <Button
+                type="button"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-6"
                 onClick={() => handleLogin()}
               >
                 Sign in
               </Button>
             </form>
-
-            {/* <div className="mt-8 text-center text-base text-gray-600 dark:text-gray-400">
-              Don't have an account?{" "}
-              <a
-                href="#"
-                className="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Sign up
-              </a>
-            </div> */}
           </CardContent>
         </Card>
       </div>

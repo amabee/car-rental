@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:car_rental_mobile/constants.dart';
 import 'package:car_rental_mobile/book_car.dart';
 
-
 class AvailableCars extends StatefulWidget {
   @override
   _AvailableCarsState createState() => _AvailableCarsState();
@@ -19,7 +18,7 @@ class _AvailableCarsState extends State<AvailableCars> {
   void initState() {
     super.initState();
     selectedFilter = filters[0];
-    futureCars = fetchAvailableCars();
+    futureCars = fetchAllCars();
   }
 
   @override
@@ -69,7 +68,7 @@ class _AvailableCarsState extends State<AvailableCars> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Available Cars (${cars.length})",
+                            "All Cars (${cars.length})",
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 36,
@@ -116,7 +115,12 @@ class _AvailableCarsState extends State<AvailableCars> {
         child: Row(
           children: [
             buildFilterIcon(),
-            Row(children: buildFilters()),
+            Expanded(
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: buildFilters(),
+              ),
+            ),
           ],
         ),
       ),
@@ -149,7 +153,6 @@ class _AvailableCarsState extends State<AvailableCars> {
     }
     return list;
   }
-  
 
   Widget buildFilter(Filter filter) {
     return GestureDetector(
@@ -163,7 +166,7 @@ class _AvailableCarsState extends State<AvailableCars> {
         child: Text(
           filter.name,
           style: TextStyle(
-            color: selectedFilter == filter ? kPrimaryColor : Colors.grey[300],
+            color: selectedFilter == filter ? kPrimaryColor : Colors.grey[600],
             fontSize: 16,
             fontWeight:
                 selectedFilter == filter ? FontWeight.bold : FontWeight.normal,
@@ -173,4 +176,3 @@ class _AvailableCarsState extends State<AvailableCars> {
     );
   }
 }
-
