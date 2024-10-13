@@ -1,7 +1,9 @@
 import 'package:car_rental_mobile/data.dart';
+import 'package:car_rental_mobile/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'showroom_home.dart';
 import 'my_bookings.dart';
 import 'profile_page.dart';
@@ -52,15 +54,29 @@ class _ShowroomState extends State<Showroom> {
           ),
         ),
         centerTitle: false,
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(
-              Icons.logout,
-              color: Colors.black,
-              size: 28,
+            padding: const EdgeInsets.only(right: 16),
+            child: InkWell(
+              onTap: () async {
+                // Print a message for debugging
+                print('Logout tapped');
+
+                // Remove data from Hive
+                var box = await Hive.openBox('userBox');
+                await box.clear();
+
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => CarLoginSignupPage()),
+                );
+              },
+              child: const Icon(
+                Icons.logout,
+                color: Colors.black,
+                size: 28,
+              ),
             ),
-          )
+          ),
         ],
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),

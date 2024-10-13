@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -37,13 +38,23 @@ class MyBookings extends StatelessWidget {
   const MyBookings({super.key});
 
   Future<List<Booking>> fetchMyBookings() async {
+
+    var userBox = Hive.box('userBox');
+
+    int? customerId = userBox.get('customer_id');
+
+    if (customerId == null) {
+      throw Exception("Customer ID not found in Hive.");
+    }
+
     var url =
         Uri.parse('http://192.168.56.1/car-rental_api/customer/process.php');
     final query = {
       "operation": "getMyBookings",
-      "json": jsonEncode({"customer_id": 3})
+      "json": jsonEncode({"customer_id": customerId})
     };
 
+    // Make the HTTP request
     final response = await http.get(url.replace(queryParameters: query));
 
     try {
@@ -118,7 +129,7 @@ class MyBookings extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Total: \$${booking.totalAmount.toStringAsFixed(2)}',
+                            'Total: \₱${booking.totalAmount.toStringAsFixed(2)}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Container(

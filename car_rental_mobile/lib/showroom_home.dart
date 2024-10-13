@@ -11,12 +11,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ShowroomHome extends StatefulWidget {
+  const ShowroomHome({super.key});
+
   @override
   _ShowroomHomeState createState() => _ShowroomHomeState();
 }
 
 class _ShowroomHomeState extends State<ShowroomHome> {
   late Future<List<Customer>> futureTopCustomers;
+  late Future<List<Car>> futureAvailableCars;
   List<Car> cars = [];
   List<Customer> topCustomers = [];
   Timer? pollingTimer;
@@ -25,6 +28,7 @@ class _ShowroomHomeState extends State<ShowroomHome> {
   void initState() {
     super.initState();
     futureTopCustomers = fetchTopCustomers();
+    futureAvailableCars = fetchAvailableCars();
     startPollingAvailableCars();
   }
 
@@ -36,10 +40,9 @@ class _ShowroomHomeState extends State<ShowroomHome> {
           cars = fetchedCars;
         });
 
-        futureTopCustomers.then((fetchedTopCustomers) {
-          setState(() {
-            topCustomers = fetchedTopCustomers;
-          });
+        final fetchedTopCustomers = await futureTopCustomers;
+        setState(() {
+          topCustomers = fetchedTopCustomers;
         });
       } catch (error) {
         print("Error fetching available cars: $error");
@@ -120,10 +123,27 @@ class _ShowroomHomeState extends State<ShowroomHome> {
                   ),
                   SizedBox(
                     height: 280,
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      children: buildDeals(),
+                    child: FutureBuilder<List<Car>>(
+                      future: futureAvailableCars,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return Center(child: Text('No available cars.'));
+                        } else {
+                          cars = snapshot.data!;
+                          return ListView(
+                            physics: const BouncingScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            children: buildDeals(),
+                          );
+                        }
+                      },
                     ),
                   ),
                   GestureDetector(
@@ -226,14 +246,38 @@ class _ShowroomHomeState extends State<ShowroomHome> {
                       ],
                     ),
                   ),
-                  Container(
-                    height: 150,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: ListView(
-                      physics: const BouncingScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      children: buildTopCustomers(),
-                    ),
+                  FutureBuilder<List<Customer>>(
+                    future: futureTopCustomers,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Container(
+                          height: 150,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Container(
+                          height: 150,
+                          child:
+                              Center(child: Text('Error: ${snapshot.error}')),
+                        );
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return Container(
+                          height: 150,
+                          child: Center(child: Text('No top customers.')),
+                        );
+                      } else {
+                        topCustomers = snapshot.data!;
+                        return Container(
+                          height: 150,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: ListView(
+                            physics: const BouncingScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            children: buildTopCustomers(),
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),
